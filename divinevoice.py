@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import re
 st.set_page_config(layout="wide")
+st.markdown('<img src="1725431126643.png" style="display: none;">', unsafe_allow_html=True)
 def replace_citation(match):
     number = match.group(1)
     return f'<sup>[<a href="#cite-{number}">{number}</a>]</sup>'
@@ -52,7 +53,29 @@ st.markdown("""
     </style>
     <div class="chat-container">
 """, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    [data-testid="stChatMessageAvatarUser"] {
+        background-color: transparent !important;
+        background-image: url('static/1725431126643.png');
+        background-size: cover;
+        background-position: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
 
+    .st-emotion-cache-13o7eu2,
+    .st-emotion-cache-vlxhtx,
+    .chat-row.user,
+    .chat-row.assistant,
+    .st-emotion-cache-1flajlm,
+    .st-emotion-cache-1c7y2kd {
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 st.markdown("""
     <style>
@@ -112,7 +135,14 @@ for message in st.session_state.messages:
 prompt=st.chat_input("Ask anything about the Magisterium")
 if prompt:
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(
+            f'''
+        <div class="chat-row user">
+            <div class="chat-message user">{prompt}</div><div class="chat-avatar user"><img src="https://static.vecteezy.com/system/resources/previews/028/794/709/non_2x/cartoon-cute-school-boy-photo.jpg" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+        </div>
+        ''',
+        unsafe_allow_html=True
+        )
     st.session_state.messages.append({"role":"user","content":prompt})
     
     api_key=st.secrets["MAGESTERIUM_API_KEY"]
@@ -135,7 +165,14 @@ if prompt:
     styled_message = re.sub(r"\[\^(\d+)\]", replace_citation, assistant_message)
 
     with st.chat_message("Jesus"):
-        st.markdown(styled_message, unsafe_allow_html=True)
+        st.markdown(
+            f'''
+        <div class="chat-row assistant">
+            <div class="chat-message assistant">{styled_message}</div>
+        </div>
+        ''',
+        unsafe_allow_html=True
+        )
 
         citations = result.get("citations", [])
         if "citations" in result and result["citations"]:
