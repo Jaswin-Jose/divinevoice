@@ -18,6 +18,8 @@ st.markdown("""
     }
     .chat-row {
         display: flex;
+        flex-direction: row;
+        align-items: flex-start;
     }
 
     .chat-row.user {
@@ -109,7 +111,11 @@ st.markdown("""
         margin-top: 100px; /* Push content below the fixed banner */
         padding: 1rem;
     }
-    
+    .st-emotion-cache-1dgsum0 ea2tk8x2{
+        display: none !important;}
+    .stChatMessage div[data-testid="stChatMessage"] > div:nth-child(1) {
+        display: none !important;
+    }
     </style>
 
     <div class="fixed-banner">Divine Voice</div>
@@ -123,15 +129,39 @@ for message in st.session_state.messages:
     role = message["role"]
     role_class = "user" if role == "user" else "assistant"
     
-    st.markdown(
-        f'''
-        <div class="chat-row {role_class}">
-            <div class="chat-message {role_class}">{message["content"]}</div>
-        </div>
-        ''',
-        unsafe_allow_html=True
-    )   
+    if role == "user":
+        st.markdown(
+            f'''
+            <div class="chat-row {role_class}">
+                <div class="chat-message {role_class}">{message["content"]}</div><div class="chat-avatar user"><img src="https://static.vecteezy.com/system/resources/previews/028/794/709/non_2x/cartoon-cute-school-boy-photo.jpg" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f'''
+            <div class="chat-row {role_class}">
+                <div class="chat-avatar assistant">
+                    <img src="https://i.pinimg.com/736x/25/b7/c1/25b7c15dff854122980be5613239a592.jpg" style="width: 40px; height: 40px; border-radius: 50%;">
+                </div>
+                <div class="chat-message {role_class}">{message["content"]}</div>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
 
+    if role == "assistant" and "citations" in message:
+        if message["citations"]:
+            st.markdown("**Citations:**", unsafe_allow_html=True)
+            for i, cite in enumerate(message["citations"], start=1):
+                title = cite.get("document_title", "Unknown Title")
+                reference = cite.get("document_reference", "")
+                source_url = cite.get("source_url", "")
+                st.markdown(
+                    f'<p id="cite-{i}"><sup>{i}</sup> <a href="{source_url}" target="_blank">{title} ({reference})</a></p>',
+                    unsafe_allow_html=True
+                )
 prompt=st.chat_input("Ask anything about the Magisterium")
 if prompt:
     with st.chat_message("user"):
@@ -168,6 +198,9 @@ if prompt:
         st.markdown(
             f'''
         <div class="chat-row assistant">
+            <div class="chat-avatar assistant">
+                <img src="https://i.pinimg.com/736x/25/b7/c1/25b7c15dff854122980be5613239a592.jpg" style="width: 40px; height: 40px; border-radius: 50%;">
+            </div>
             <div class="chat-message assistant">{styled_message}</div>
         </div>
         ''',
@@ -193,5 +226,5 @@ if prompt:
                         unsafe_allow_html=True
                     )
 
-    st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+    st.session_state.messages.append({"role": "assistant", "content": styled_message, "citations": citations})
 st.markdown("</div>", unsafe_allow_html=True)
